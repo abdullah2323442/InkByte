@@ -56,12 +56,17 @@ class PostResource extends Resource
                 Section::make('Meta')->schema(
                     [
                         FileUpload::make('image')->image()->directory('posts/thumbnails'),
-                        DateTimePicker::make('published_at')->nullable(),
+                        Checkbox::make('published')
+                            ->afterStateUpdated(function ($state) {
+                                if ($state) {
+                                    return DateTimePicker::make('published_at')->default(now());
+                                }
+                            }),
+
                         Checkbox::make('featured'),
                         Select::make('user_id')
-                            ->relationship('author', 'name')
-                            ->searchable()
-                            ->required(),
+                            ->default(auth()->id())
+                            ->hidden(),
                         Select::make('categories')
                             ->multiple()
                             ->relationship('categories', 'title')
@@ -81,12 +86,15 @@ class PostResource extends Resource
                 TextColumn::make('author.name')->sortable()->searchable(),
                 TextColumn::make('published_at')->date('Y-m-d')->sortable()->searchable(),
                 CheckboxColumn::make('featured'),
+                CheckboxColumn::make('published'),
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\DeleteAction::make()
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

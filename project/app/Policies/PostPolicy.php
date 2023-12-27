@@ -7,6 +7,10 @@ use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
 class PostPolicy
+/**
+ * Policy class that determines if a user can perform CRUD operations on Post models. 
+ * Checks user roles and ownership to authorize actions.
+ */
 {
     /**
      * Determine whether the user can view any models.
@@ -21,14 +25,9 @@ class PostPolicy
      */
     public function view(User $user, Post $post): bool
     {
-        // Check if post is published
-        if ($post->is_published) {
-            return true; // Anyone can view published posts
-        }
-
-        // Check if user is admin, editor, or author
         return $user->id === $post->user_id;
     }
+
 
 
     /**
@@ -36,7 +35,7 @@ class PostPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isAdmin() || $user->isEditor() || $user->isUser();
+        return $user->isUser();
     }
 
     /**
